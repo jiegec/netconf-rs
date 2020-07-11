@@ -1,9 +1,7 @@
 use crate::transport::Transport;
-use log::*;
 use memmem::{Searcher, TwoWaySearcher};
 use ssh2::Channel;
 use ssh2::Session;
-use std::collections::VecDeque;
 use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;

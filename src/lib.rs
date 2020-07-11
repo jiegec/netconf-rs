@@ -1,6 +1,10 @@
 use crate::transport::Transport;
 use log::*;
+use markup5ever_rcdom::{NodeData, RcDom};
 use std::io;
+use xml5ever::driver::parse_document;
+use xml5ever::tendril::stream::TendrilSink;
+use xml5ever::tree_builder::TreeSink;
 
 pub mod transport;
 
@@ -33,7 +37,21 @@ impl Connection {
         "#,
         )?;
         let resp = self.transport.read_xml()?;
-        info!("Got {}", resp);
+        let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(resp.as_str());
+        let doc = &dom.document;
+        // /hello/capabilities
+        let hello = &doc.children.borrow()[1];
+        let caps = &hello.children.borrow()[0];
+        for node in caps.children.borrow().iter() {
+            let text_node = &node.children.borrow()[0];
+            match &text_node.data {
+                &NodeData::Text { ref contents } => {
+                    info!("capability {}", contents.borrow());
+                }
+                _ => {}
+            }
+        }
+        //info!("Got {:?}", resp);
         Ok(())
     }
 }
