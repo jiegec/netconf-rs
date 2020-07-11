@@ -1,12 +1,17 @@
+use crate::transport::Transport;
 use log::*;
 use memmem::{Searcher, TwoWaySearcher};
+use ssh2::Channel;
 use ssh2::Session;
+use std::collections::VecDeque;
 use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
 pub struct SSHTransport {
     session: Session,
+    channel: Channel,
+    read_buffer: Vec<u8>,
 }
 
 impl SSHTransport {
@@ -18,41 +23,37 @@ impl SSHTransport {
 
         sess.userauth_password(user_name, password)?;
         if sess.authenticated() {
-            let mut res = SSHTransport { session: sess };
-            res.hello()?;
+            let mut channel = sess.channel_session()?;
+            channel.subsystem("netconf")?;
+            let mut res = SSHTransport {
+                session: sess,
+                channel,
+                read_buffer: Vec::new(),
+            };
             Ok(res)
         } else {
             Err(io::Error::last_os_error())
         }
     }
+}
 
-    fn hello(&mut self) -> io::Result<()> {
-        let mut channel = self.session.channel_session()?;
-        channel.subsystem("netconf")?;
-        info!("Get capabilities of NetConf server");
-        write!(
-            &mut channel,
-            r#"
-        <?xml version="1.0" encoding="UTF-8"?>
-<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <capabilities>
-        <capability>
-            urn:ietf:params:netconf:base:1.0
-        </capability>
-    </capabilities>
-</hello>
-]]>]]>
-        "#
-        )?;
+impl Transport for SSHTransport {
+    fn read_xml(&mut self) -> io::Result<String> {
         let mut buffer = [0u8; 128];
-        let mut s = Vec::new();
         let search = TwoWaySearcher::new("]]>]]>".as_bytes());
-        while search.search_in(&s).is_none() {
-            let bytes = channel.read(&mut buffer)?;
-            s.extend(&buffer[..bytes]);
+        while search.search_in(&self.read_buffer).is_none() {
+            let bytes = self.channel.read(&mut buffer)?;
+            self.read_buffer.extend(&buffer[..bytes]);
         }
-        let resp = String::from_utf8(s).unwrap();
-        info!("Got {}", resp);
+        let pos = search.search_in(&self.read_buffer).unwrap();
+        let resp = String::from_utf8(self.read_buffer[..pos].to_vec()).unwrap();
+        // 6: ]]>]]>
+        self.read_buffer.drain(0..(pos + 6));
+        Ok(resp)
+    }
+
+    fn write_xml(&mut self, data: &str) -> io::Result<()> {
+        write!(&mut self.channel, r#"]]>]]>{}"#, data)?;
         Ok(())
     }
 }
