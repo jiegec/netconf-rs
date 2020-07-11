@@ -8,3 +8,8 @@ edition = "2018"
 
 [dependencies]
 ssh2 = "0.8.2"
+log = "0.4.8"
+memmem = "0.1.1"
+
+[dev-dependencies]
+env_logger = "0.7.1"
