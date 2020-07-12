@@ -1,5 +1,6 @@
 use log::*;
 use netconf_rs;
+use netconf_rs::vendor::h3c::create_vlan;
 use netconf_rs::vendor::h3c::get_vlan_config;
 use netconf_rs::Connection;
 
@@ -13,5 +14,6 @@ fn main() {
     let mut conn = Connection::new(ssh).unwrap();
     conn.get_config().unwrap();
     get_vlan_config(&mut conn).unwrap();
+    create_vlan(&mut conn, "10", "Test VLAN 10").unwrap();
     info!("connected to {}", addr);
 }
