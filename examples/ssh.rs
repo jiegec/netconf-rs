@@ -9,6 +9,7 @@ fn main() {
     let addr = args.next().unwrap();
     info!("connecting to {}", addr);
     let ssh = netconf_rs::transport::ssh::SSHTransport::connect(&addr, "admin", "admin").unwrap();
-    let conn = Connection::new(ssh).unwrap();
+    let mut conn = Connection::new(ssh).unwrap();
+    conn.get_config().unwrap();
     info!("connected to {}", addr);
 }

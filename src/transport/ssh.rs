@@ -51,7 +51,7 @@ impl Transport for SSHTransport {
     }
 
     fn write_xml(&mut self, data: &str) -> io::Result<()> {
-        write!(&mut self.channel, r#"]]>]]>{}"#, data)?;
+        write!(&mut self.channel, r#"{}]]>]]>"#, data.trim())?;
         Ok(())
     }
 }

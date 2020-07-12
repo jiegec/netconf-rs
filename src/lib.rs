@@ -1,12 +1,20 @@
 use crate::transport::Transport;
 use log::*;
-use markup5ever_rcdom::{NodeData, RcDom};
+use serde_derive::Deserialize;
+use serde_xml_rs::from_str;
 use std::io;
-use xml5ever::driver::parse_document;
-use xml5ever::tendril::stream::TendrilSink;
-use xml5ever::tree_builder::TreeSink;
 
 pub mod transport;
+
+#[derive(Debug, Deserialize)]
+pub struct Hello {
+    pub capabilities: Capabilities,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Capabilities {
+    pub capability: Vec<String>,
+}
 
 pub struct Connection {
     transport: Box<dyn Transport + 'static>,
@@ -25,7 +33,7 @@ impl Connection {
         info!("Get capabilities of NetConf server");
         self.transport.write_xml(
             r#"
-        <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
     <capabilities>
         <capability>
@@ -37,22 +45,29 @@ impl Connection {
         "#,
         )?;
         let resp = self.transport.read_xml()?;
-        let dom: RcDom = parse_document(RcDom::default(), Default::default()).one(resp.as_str());
-        let doc = &dom.document;
-        // /hello/capabilities
-        let hello = &doc.children.borrow()[1];
-        let caps = &hello.children.borrow()[0];
-        for node in caps.children.borrow().iter() {
-            let text_node = &node.children.borrow()[0];
-            match &text_node.data {
-                &NodeData::Text { ref contents } => {
-                    info!("capability {}", contents.borrow());
-                }
-                _ => {}
-            }
-        }
-        //info!("Got {:?}", resp);
+        let hello: Hello = from_str(&resp).unwrap();
+        println!("{:#?}", hello);
         Ok(())
+    }
+
+    pub fn get_config(&mut self) -> io::Result<String> {
+        self.transport.write_xml(
+            r#"
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc message-id="100"
+     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <get-config>
+    <source>
+      <running/>
+    </source>
+  </get-config>
+</rpc>
+]]>]]>
+        "#,
+        )?;
+        let resp = self.transport.read_xml()?;
+        println!("{}", resp);
+        Ok(resp)
     }
 }
 
