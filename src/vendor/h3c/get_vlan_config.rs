@@ -5,17 +5,17 @@ use serde_xml_rs::from_str;
 use std::io;
 
 #[derive(Debug, Deserialize)]
-pub struct RpcReply {
+struct RpcReply {
     pub data: Data,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Data {
+struct Data {
     pub top: Top,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Top {
+struct Top {
     #[serde(rename = "VLAN")]
     pub vlan: VlanConfig,
 }
