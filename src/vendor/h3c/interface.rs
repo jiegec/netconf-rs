@@ -27,7 +27,7 @@ struct Top {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Ifmgr {
+struct Ifmgr {
     #[serde(rename = "Interfaces")]
     pub interfaces: Interfaces,
 }

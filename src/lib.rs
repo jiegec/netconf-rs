@@ -8,15 +8,16 @@ pub mod transport;
 pub mod vendor;
 
 #[derive(Debug, Deserialize)]
-pub struct Hello {
+struct Hello {
     pub capabilities: Capabilities,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Capabilities {
+struct Capabilities {
     pub capability: Vec<String>,
 }
 
+/// A connection to NETCONF server
 pub struct Connection {
     pub(crate) transport: Box<dyn Transport + 'static>,
 }

@@ -1,3 +1,5 @@
+//! SSH transport
+
 use crate::transport::Transport;
 use memmem::{Searcher, TwoWaySearcher};
 use ssh2::Channel;
@@ -6,6 +8,7 @@ use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
+/// NETCONF over SSH
 pub struct SSHTransport {
     session: Session,
     channel: Channel,
