@@ -14,7 +14,7 @@ fn main() {
     conn.get_config().unwrap();
     get_vlan_config(&mut conn).unwrap();
 
-    // create vlan 0 and 1
+    // create vlan 10 and 11
     create_vlan(&mut conn, 10, "Test VLAN 10").unwrap();
     create_vlan(&mut conn, 11, "Test VLAN 11").unwrap();
     // assign access ports
