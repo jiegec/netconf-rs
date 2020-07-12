@@ -5,6 +5,7 @@ use serde_xml_rs::from_str;
 use std::io;
 
 pub mod transport;
+pub mod vendor;
 
 #[derive(Debug, Deserialize)]
 pub struct Hello {
@@ -17,7 +18,7 @@ pub struct Capabilities {
 }
 
 pub struct Connection {
-    transport: Box<dyn Transport + 'static>,
+    pub(crate) transport: Box<dyn Transport + 'static>,
 }
 
 impl Connection {
@@ -55,26 +56,16 @@ impl Connection {
             r#"
 <?xml version="1.0" encoding="UTF-8"?>
 <rpc message-id="100"
-     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-  <get-config>
-    <source>
-      <running/>
-    </source>
-  </get-config>
+    xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <get-config>
+        <source>
+            <running/>
+        </source>
+    </get-config>
 </rpc>
-]]>]]>
         "#,
         )?;
         let resp = self.transport.read_xml()?;
-        println!("{}", resp);
         Ok(resp)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

@@ -1,5 +1,6 @@
 use log::*;
 use netconf_rs;
+use netconf_rs::vendor::h3c::get_vlan_config;
 use netconf_rs::Connection;
 
 fn main() {
@@ -11,5 +12,6 @@ fn main() {
     let ssh = netconf_rs::transport::ssh::SSHTransport::connect(&addr, "admin", "admin").unwrap();
     let mut conn = Connection::new(ssh).unwrap();
     conn.get_config().unwrap();
+    get_vlan_config(&mut conn).unwrap();
     info!("connected to {}", addr);
 }

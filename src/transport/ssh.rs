@@ -23,7 +23,7 @@ impl SSHTransport {
         if sess.authenticated() {
             let mut channel = sess.channel_session()?;
             channel.subsystem("netconf")?;
-            let mut res = SSHTransport {
+            let res = SSHTransport {
                 session: sess,
                 channel,
                 read_buffer: Vec::new(),
