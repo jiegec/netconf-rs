@@ -1,3 +1,8 @@
+//! Get list of VLAN
+//!
+//! Reference:
+//! https://github.com/HPENetworking/pyhpecw7/blob/master/pyhpecw7/features/vlan.py
+
 use crate::Connection;
 use log::*;
 use serde_derive::Deserialize;
@@ -40,6 +45,7 @@ pub struct Vlan {
     pub description: Option<String>,
 }
 
+/// Get all VLAN configs.
 pub fn get_vlan_config(conn: &mut Connection) -> io::Result<VlanConfig> {
     conn.transport.write_xml(
         r#"
@@ -59,7 +65,6 @@ pub fn get_vlan_config(conn: &mut Connection) -> io::Result<VlanConfig> {
 </rpc>"#,
     )?;
     let resp = conn.transport.read_xml()?;
-    info!("Got {}", resp);
     let reply: RpcReply = from_str(&resp).unwrap();
     info!("{:#?}", reply.data.top.vlan.vlans);
     Ok(reply.data.top.vlan)

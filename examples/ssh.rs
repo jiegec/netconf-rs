@@ -1,7 +1,6 @@
 use log::*;
 use netconf_rs;
-use netconf_rs::vendor::h3c::create_vlan;
-use netconf_rs::vendor::h3c::get_vlan_config;
+use netconf_rs::vendor::h3c::*;
 use netconf_rs::Connection;
 
 fn main() {
@@ -14,6 +13,14 @@ fn main() {
     let mut conn = Connection::new(ssh).unwrap();
     conn.get_config().unwrap();
     get_vlan_config(&mut conn).unwrap();
-    create_vlan(&mut conn, "10", "Test VLAN 10").unwrap();
+
+    // create vlan 0 and 1
+    create_vlan(&mut conn, 10, "Test VLAN 10").unwrap();
+    create_vlan(&mut conn, 11, "Test VLAN 11").unwrap();
+    // assign access ports
+    set_access_vlan(&mut conn, 1, 10).unwrap();
+    set_access_vlan(&mut conn, 2, 11).unwrap();
+
+    get_interfaces(&mut conn).unwrap();
     info!("connected to {}", addr);
 }
