@@ -10,11 +10,11 @@ edition = "2018"
 
 [dependencies]
 ssh2 = "0.8.2"
-log = "0.4.8"
+log = "0.4.11"
 memmem = "0.1.1"
 serde-xml-rs = "0.4.0"
-serde = "1.0.114"
-serde_derive = "1.0.114"
+serde = "1.0.115"
+serde_derive = "1.0.115"
 
 [dev-dependencies]
 env_logger = "0.7.1"
