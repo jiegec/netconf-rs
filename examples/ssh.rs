@@ -17,9 +17,18 @@ fn main() {
     // create vlan 10 and 11
     create_vlan(&mut conn, 10, "Test VLAN 10").unwrap();
     create_vlan(&mut conn, 11, "Test VLAN 11").unwrap();
+
     // assign access ports
-    set_access_vlan(&mut conn, 1, 10).unwrap();
-    set_access_vlan(&mut conn, 2, 11).unwrap();
+    // port 1 access vlan 10
+    set_vlan_access_port(&mut conn, 1, 10).unwrap();
+    // port 2 access vlan 11
+    set_vlan_access_port(&mut conn, 2, 11).unwrap();
+
+    // assign trunk ports
+    // port 9 trunk permit 1025 pvid 1025
+    set_vlan_trunk_port(&mut conn, 9, &[1025], Some(1025)).unwrap();
+    // port 10 trunk permit 1025 pvid 1025
+    set_vlan_trunk_port(&mut conn, 10, &[1025], Some(1025)).unwrap();
 
     get_interfaces(&mut conn).unwrap();
     info!("connected to {}", addr);

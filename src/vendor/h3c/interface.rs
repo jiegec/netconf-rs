@@ -1,5 +1,5 @@
 //! Get all interfaces
-//! 
+//!
 //! Reference:
 //! https://github.com/HPENetworking/pyhpecw7/blob/master/pyhpecw7/features/interface.py
 //! https://github.com/HPENetworking/pyhpecw7/blob/master/pyhpecw7/features/switchport.py
