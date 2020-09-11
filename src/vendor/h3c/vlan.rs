@@ -74,10 +74,40 @@ pub fn set_vlan_access_port(conn: &mut Connection, id: usize, vlan: usize) -> io
 /// Set port to VLAN trunk
 pub fn set_vlan_trunk_port(
     conn: &mut Connection,
-    id: usize,
+    port_id: usize,
     permit_vlan_list: &[usize],
     pvid: Option<usize>,
 ) -> io::Result<()> {
+    // set trunk
+    conn.transport.write_xml(&format!(
+        r#"
+<?xml version="1.0" encoding="UTF-8"?>
+<rpc message-id="100"
+    xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <running/>
+        </target>
+        <config>
+            <top xmlns="http://www.h3c.com/netconf/config:1.0">
+                <Ifmgr>
+                    <Interfaces>
+                        <Interface>
+                            <IfIndex>{}</IfIndex>
+                            <LinkType>2</LinkType>
+                        </Interface>
+                    </Interfaces>
+                </Ifmgr>
+            </top>
+         </config>
+    </edit-config>
+</rpc>"#,
+        port_id,
+    ))?;
+    let resp = conn.transport.read_xml()?;
+    debug!("Got {}", resp);
+
+    // set permit_vlan_list and pvid
     conn.transport.write_xml(&format!(
         r#"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -102,7 +132,7 @@ pub fn set_vlan_trunk_port(
          </config>
     </edit-config>
 </rpc>"#,
-        id,
+        port_id,
         permit_vlan_list
             .iter()
             .map(|num| format!("{}", num))
