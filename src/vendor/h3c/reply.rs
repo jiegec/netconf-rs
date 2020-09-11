@@ -92,7 +92,7 @@ pub struct MacUnicastTable {
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 pub struct Unicast {
     #[serde(rename = "VLANID")]
-    pub id: usize,
+    pub vlan_id: usize,
     #[serde(rename = "MacAddress")]
     pub mac_address: String,
     #[serde(rename = "PortIndex")]
@@ -151,14 +151,14 @@ mod tests {
                             table: MacUnicastTable {
                                 unicast: vec![
                                     Unicast {
-                                        id: 1,
+                                        vlan_id: 1,
                                         mac_address: String::from("12-34-56-78-90-AB"),
                                         port_index: 634,
                                         status: 2,
                                         aging: true
                                     },
                                     Unicast {
-                                        id: 2,
+                                        vlan_id: 2,
                                         mac_address: String::from("11-11-11-11-11-11"),
                                         port_index: 10,
                                         status: 2,
