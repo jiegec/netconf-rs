@@ -35,7 +35,7 @@ pub fn create_vlan(conn: &mut Connection, id: usize, desc: &str) -> io::Result<(
         id, desc
     ))?;
     let resp = conn.transport.read_xml()?;
-    info!("Got {}", resp);
+    debug!("Got {}", resp);
     Ok(())
 }
 
@@ -67,7 +67,7 @@ pub fn set_vlan_access_port(conn: &mut Connection, id: usize, vlan: usize) -> io
         id, vlan
     ))?;
     let resp = conn.transport.read_xml()?;
-    info!("Got {}", resp);
+    debug!("Got {}", resp);
     Ok(())
 }
 
@@ -111,6 +111,6 @@ pub fn set_vlan_trunk_port(
         pvid.unwrap_or(1) // default pvid is VLAN 1
     ))?;
     let resp = conn.transport.read_xml()?;
-    info!("Got {}", resp);
+    debug!("Got {}", resp);
     Ok(())
 }

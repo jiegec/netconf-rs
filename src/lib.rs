@@ -32,7 +32,7 @@ impl Connection {
     }
 
     fn hello(&mut self) -> io::Result<()> {
-        info!("Get capabilities of NetConf server");
+        debug!("Get capabilities of NetConf server");
         self.transport.write_xml(
             r#"
 <?xml version="1.0" encoding="UTF-8"?>

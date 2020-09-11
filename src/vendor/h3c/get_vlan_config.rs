@@ -66,6 +66,6 @@ pub fn get_vlan_config(conn: &mut Connection) -> io::Result<VlanConfig> {
     )?;
     let resp = conn.transport.read_xml()?;
     let reply: RpcReply = from_str(&resp).unwrap();
-    info!("{:#?}", reply.data.top.vlan.vlans);
+    debug!("{:#?}", reply.data.top.vlan.vlans);
     Ok(reply.data.top.vlan)
 }
