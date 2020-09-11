@@ -48,7 +48,7 @@ impl Connection {
         )?;
         let resp = self.transport.read_xml()?;
         let hello: Hello = from_str(&resp).unwrap();
-        println!("{:#?}", hello);
+        debug!("{:#?}", hello);
         Ok(())
     }
 
