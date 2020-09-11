@@ -1,11 +1,11 @@
-use super::RpcReply;
+use super::{Mac, RpcReply};
 use crate::Connection;
 use log::*;
 use serde_xml_rs::from_str;
 use std::io;
 
 /// Get YANG schema
-pub fn get_mac_table(conn: &mut Connection) -> io::Result<String> {
+pub fn get_mac_table(conn: &mut Connection) -> io::Result<Mac> {
     conn.transport.write_xml(&format!(
         r#"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -24,8 +24,7 @@ pub fn get_mac_table(conn: &mut Connection) -> io::Result<String> {
 </rpc>"#,
     ))?;
     let resp = conn.transport.read_xml()?;
-    info!("{}", resp);
     let reply: RpcReply = from_str(&resp).unwrap();
-    info!("{:?}", reply.data);
-    Ok(resp)
+    debug!("{:?}", reply.data);
+    Ok(reply.data.top.unwrap().mac.unwrap())
 }
