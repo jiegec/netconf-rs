@@ -8,12 +8,14 @@
 
 mod get_vlan_config;
 mod interface;
+mod l2;
 mod netconf;
 mod reply;
 mod vlan;
 
 pub use get_vlan_config::*;
 pub use interface::*;
+pub use l2::*;
 pub use netconf::*;
 pub use reply::*;
 pub use vlan::*;

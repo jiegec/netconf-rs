@@ -32,6 +32,6 @@ pub fn get_interfaces(conn: &mut Connection) -> io::Result<Interfaces> {
     let resp = conn.transport.read_xml()?;
     let reply: RpcReply = from_str(&resp).unwrap();
     let top = reply.data.top.unwrap();
-    debug!("{:#?}", top.ifmgr.interfaces);
-    Ok(top.ifmgr.interfaces)
+    debug!("{:#?}", top.ifmgr);
+    Ok(top.ifmgr.unwrap().interfaces)
 }

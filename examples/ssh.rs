@@ -13,6 +13,8 @@ fn main() {
     let mut conn = Connection::new(ssh).unwrap();
     conn.get_config().unwrap();
     get_netconf_information(&mut conn).unwrap();
+    //get_schema(&mut conn, "openconfig-network-instance-l2", "2018-03-28", "yang").unwrap();
+    get_mac_table(&mut conn).unwrap();
     /*
     get_vlan_config(&mut conn).unwrap();
 
