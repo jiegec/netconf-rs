@@ -12,6 +12,8 @@ fn main() {
     let ssh = netconf_rs::transport::ssh::SSHTransport::connect(&addr, "admin", "admin").unwrap();
     let mut conn = Connection::new(ssh).unwrap();
     conn.get_config().unwrap();
+    get_netconf_information(&mut conn).unwrap();
+    /*
     get_vlan_config(&mut conn).unwrap();
 
     // create vlan 10 and 11
@@ -31,5 +33,6 @@ fn main() {
     set_vlan_trunk_port(&mut conn, 10, &[1025], Some(1025)).unwrap();
 
     get_interfaces(&mut conn).unwrap();
+    */
     info!("connected to {}", addr);
 }
