@@ -19,7 +19,7 @@ struct Capabilities {
 
 /// A connection to NETCONF server
 pub struct Connection {
-    pub(crate) transport: Box<dyn Transport + 'static>,
+    pub(crate) transport: Box<dyn Transport + Send + 'static>,
 }
 
 impl Connection {
