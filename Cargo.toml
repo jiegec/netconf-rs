@@ -4,17 +4,17 @@ version = "0.2.4"
 authors = ["Jiajie Chen <c@jia.je>"]
 description = "A Rust library for NETCONF(RFC 2641)"
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ssh2 = "0.9.1"
-log = "0.4.14"
+ssh2 = "0.9.3"
+log = "0.4.17"
 memmem = "0.1.1"
-serde-xml-rs = "0.5.0"
-serde = "1.0.130"
-serde_derive = "1.0.130"
+serde-xml-rs = "0.5.1"
+serde = "1.0.137"
+serde_derive = "1.0.137"
 
 [dev-dependencies]
 env_logger = "0.9.0"
