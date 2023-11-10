@@ -24,7 +24,7 @@ pub fn get_mac_table(conn: &mut Connection) -> io::Result<Mac> {
 </rpc>"#,
     ))?;
     let resp = conn.transport.read_xml()?;
-    let reply: RpcReply = from_str(&resp).unwrap();
+    let reply: RpcReply = from_str(&resp.trim()).unwrap();
     debug!("{:?}", reply.data);
     Ok(reply.data.top.unwrap().mac.unwrap())
 }

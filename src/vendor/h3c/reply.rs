@@ -140,7 +140,7 @@ mod tests {
 </rpc-reply> 
         "#;
 
-        let reply: RpcReply = from_str(&resp).unwrap();
+        let reply: RpcReply = from_str(&resp.trim()).unwrap();
         assert_eq!(
             reply,
             RpcReply {
