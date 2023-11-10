@@ -1,6 +1,6 @@
 [package]
 name = "netconf-rs"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["Jiajie Chen <c@jia.je>"]
 description = "A Rust library for NETCONF(RFC 2641)"
 license = "MIT"
