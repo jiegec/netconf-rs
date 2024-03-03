@@ -2,7 +2,7 @@
 name = "netconf-rs"
 version = "0.2.6"
 authors = ["Jiajie Chen <c@jia.je>"]
-description = "A Rust library for NETCONF(RFC 2641)"
+description = "A Rust library for NETCONF(RFC 6241)"
 readme = "README.md"
 repository = "https://github.com/jiegec/netconf-rs"
 license = "MIT"

@@ -1,6 +1,6 @@
 # netconf-rs
 
-A Rust library to configure devices with NETCONF(RFC 2641) protocol.
+A Rust library to configure devices with NETCONF(RFC 6241) protocol.
 
 ## Transports
 
