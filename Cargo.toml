@@ -29,6 +29,10 @@ async-trait = { version = "0.1", optional = true }
 [dev-dependencies]
 env_logger = "0.11.1"
 
+[[example]]
+name = "ssh"
+required-features = ["ssh2"]
+
 [features]
 default = ["ssh2", "serde-xml"]
 ssh2 = ["dep:ssh2"]
