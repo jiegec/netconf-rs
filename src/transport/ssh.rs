@@ -1,4 +1,53 @@
 //! SSH transport using ssh2 library
+//!
+//! This module provides NETCONF over SSH using the `ssh2` library, which is
+//! a C-based SSH client library.
+//!
+//! ## Features
+//!
+//! - Synchronous API (blocking I/O)
+//! - Password authentication
+//! - Configurable SSH algorithms (KEX, ciphers, MACs, compression)
+//! - Timeout support for connection and handshake
+//!
+//! ## Module Path
+//!
+//! `crate::transport::ssh::SSHTransport`
+//!
+//! ## Examples
+//!
+//! ### Basic usage
+//!
+//! ```no_run
+//! use netconf_rs::transport::ssh::SSHTransport;
+//!
+//! # fn main() -> std::io::Result<()> {
+//! let transport = SSHTransport::connect("192.168.1.1:830", "admin", "password")?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ### With custom configuration
+//!
+//! ```no_run
+//! use netconf_rs::transport::ssh::{SSHTransport, SSHConfig};
+//! use std::time::Duration;
+//!
+//! # fn main() -> std::io::Result<()> {
+//! let config = SSHConfig::new()
+//!     .connect_timeout(Duration::from_secs(10))
+//!     .kex_algo("curve25519-sha256,diffie-hellman-group14-sha256")
+//!     .cipher_algo("chacha20-poly1305@openssh.com,aes256-gcm@openssh.com");
+//!
+//! let transport = SSHTransport::connect_with_config(
+//!     "192.168.1.1:830",
+//!     "admin",
+//!     "password",
+//!     &config
+//! )?;
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::transport::Transport;
 use memmem::{Searcher, TwoWaySearcher};
@@ -10,6 +59,22 @@ use std::time::Duration;
 use ssh2::{Channel, Session};
 
 /// Configuration for SSH transport using ssh2 library
+///
+/// This struct provides fine-grained control over SSH connection parameters
+/// including timeouts and cryptographic algorithms.
+///
+/// # Example
+///
+/// ```
+/// use netconf_rs::transport::ssh::SSHConfig;
+/// use std::time::Duration;
+///
+/// let config = SSHConfig::new()
+///     .connect_timeout(Duration::from_secs(10))
+///     .handshake_timeout(Duration::from_secs(15))
+///     .kex_algo("curve25519-sha256,diffie-hellman-group14-sha256")
+///     .cipher_algo("chacha20-poly1305@openssh.com,aes256-gcm@openssh.com");
+/// ```
 #[derive(Debug, Clone)]
 pub struct SSHConfig {
     /// Timeout for TCP connection
@@ -102,6 +167,28 @@ impl SSHConfig {
 }
 
 /// NETCONF over SSH using ssh2 library
+///
+/// This struct provides a synchronous NETCONF transport over SSH using the `ssh2` library.
+/// It manages the underlying SSH session and NETCONF channel, handling message framing
+/// with the `]]>]]>` delimiter.
+///
+/// The transport automatically:
+/// - Establishes a TCP connection to the server
+/// - Performs the SSH handshake
+/// - Authenticates with the provided credentials
+/// - Opens a NETCONF subsystem channel
+///
+/// # Examples
+///
+/// ```no_run
+/// use netconf_rs::transport::ssh::SSHTransport;
+///
+/// # fn main() -> std::io::Result<()> {
+/// let transport = SSHTransport::connect("192.168.1.1:830", "admin", "password")?;
+/// // Use transport with Connection
+/// # Ok(())
+/// # }
+/// ```
 pub struct SSHTransport {
     #[allow(dead_code)]
     session: Session,
@@ -110,11 +197,82 @@ pub struct SSHTransport {
 }
 
 impl SSHTransport {
-    /// Connect with default configuration
+    /// Connect to a NETCONF server with default configuration
+    ///
+    /// This method establishes a NETCONF over SSH connection using default settings:
+    /// - 30 second connection timeout
+    /// - 30 second handshake timeout
+    /// - Default SSH algorithms
+    ///
+    /// # Arguments
+    ///
+    /// * `addr` - Server address in format "host:port" (e.g., "192.168.1.1:830")
+    /// * `user_name` - SSH username
+    /// * `password` - SSH password
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the initialized `SSHTransport` or an `io::Error`
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use netconf_rs::transport::ssh::SSHTransport;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let transport = SSHTransport::connect("192.168.1.1:830", "admin", "password")?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn connect(addr: &str, user_name: &str, password: &str) -> io::Result<SSHTransport> {
         Self::connect_with_config(addr, user_name, password, &SSHConfig::default())
     }
 
+    /// Connect to a NETCONF server with custom SSH configuration
+    ///
+    /// This method establishes a NETCONF over SSH connection with custom settings
+    /// for timeouts and cryptographic algorithms.
+    ///
+    /// # Arguments
+    ///
+    /// * `addr` - Server address in format "host:port" (e.g., "192.168.1.1:830")
+    /// * `user_name` - SSH username
+    /// * `password` - SSH password
+    /// * `config` - SSH configuration options
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the initialized `SSHTransport` or an `io::Error`
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The address is invalid
+    /// - TCP connection fails
+    /// - SSH handshake fails
+    /// - Authentication fails
+    /// - NETCONF subsystem cannot be opened
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use netconf_rs::transport::ssh::{SSHTransport, SSHConfig};
+    /// use std::time::Duration;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let config = SSHConfig::new()
+    ///     .connect_timeout(Duration::from_secs(10))
+    ///     .kex_algo("curve25519-sha256");
+    ///
+    /// let transport = SSHTransport::connect_with_config(
+    ///     "192.168.1.1:830",
+    ///     "admin",
+    ///     "password",
+    ///     &config
+    /// )?;
+    /// # Ok(())
+    /// # }
+    /// ```
     /// Connect with custom configuration
     pub fn connect_with_config(
         addr: &str,

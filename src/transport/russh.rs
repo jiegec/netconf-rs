@@ -1,4 +1,72 @@
 //! SSH transport using russh library
+//!
+//! This module provides NETCONF over SSH using the `russh` library, which is
+//! a pure Rust implementation of the SSH protocol.
+//!
+//! ## Features
+//!
+//! - Pure Rust implementation (no C dependencies)
+//! - Async/await support with Tokio runtime
+//! - Password and key-based authentication
+//! - Configurable inactivity timeout
+//!
+//! ## Module Path
+//!
+//! `crate::transport::russh::RusshTransport`
+//!
+//! ## Examples
+//!
+//! ### Password authentication
+//!
+//! ```no_run
+//! use netconf_rs::transport::russh::RusshTransport;
+//!
+//! # fn main() -> std::io::Result<()> {
+//! let transport = RusshTransport::connect_password(
+//!     "192.168.1.1:830",
+//!     "admin",
+//!     "password"
+//! )?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ### Key-based authentication
+//!
+//! ```no_run
+//! use netconf_rs::transport::russh::RusshTransport;
+//! use std::path::Path;
+//!
+//! # fn main() -> std::io::Result<()> {
+//! let transport = RusshTransport::connect_key(
+//!     "192.168.1.1:830",
+//!     "admin",
+//!     Path::new("/path/to/private/key"),
+//!     Some("passphrase") // None if key has no passphrase
+//! )?;
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ### With custom configuration
+//!
+//! ```no_run
+//! use netconf_rs::transport::russh::{RusshTransport, RusshConfig};
+//! use std::time::Duration;
+//!
+//! # fn main() -> std::io::Result<()> {
+//! let config = RusshConfig::new()
+//!     .inactivity_timeout(Duration::from_secs(60));
+//!
+//! let transport = RusshTransport::connect_password_with_config(
+//!     "192.168.1.1:830",
+//!     "admin",
+//!     "password",
+//!     &config
+//! )?;
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::transport::Transport;
 use memmem::{Searcher, TwoWaySearcher};
@@ -12,6 +80,18 @@ use std::time::Duration;
 use tokio::runtime::Runtime;
 
 /// Configuration for SSH transport using russh library
+///
+/// This struct provides configuration options for SSH connections using the `russh` library.
+///
+/// # Example
+///
+/// ```
+/// use netconf_rs::transport::russh::RusshConfig;
+/// use std::time::Duration;
+///
+/// let config = RusshConfig::new()
+///     .inactivity_timeout(Duration::from_secs(60));
+/// ```
 #[derive(Debug, Clone)]
 pub struct RusshConfig {
     /// Timeout for inactivity
@@ -48,6 +128,51 @@ impl RusshConfig {
 }
 
 /// NETCONF over SSH using russh library
+///
+/// This struct provides an asynchronous NETCONF transport over SSH using the `russh` library.
+/// It manages the underlying SSH session and NETCONF channel, handling message framing
+/// with the `]]>]]>` delimiter.
+///
+/// The transport automatically:
+/// - Establishes a TCP connection to the server
+/// - Performs the SSH handshake
+/// - Authenticates with the provided credentials (password or key)
+/// - Opens a NETCONF subsystem channel
+/// - Bridges async and sync worlds using a Tokio runtime
+///
+/// # Examples
+///
+/// ### Password authentication
+///
+/// ```no_run
+/// use netconf_rs::transport::russh::RusshTransport;
+///
+/// # fn main() -> std::io::Result<()> {
+/// let transport = RusshTransport::connect_password(
+///     "192.168.1.1:830",
+///     "admin",
+///     "password"
+/// )?;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// ### Key-based authentication
+///
+/// ```no_run
+/// use netconf_rs::transport::russh::RusshTransport;
+/// use std::path::Path;
+///
+/// # fn main() -> std::io::Result<()> {
+/// let transport = RusshTransport::connect_key(
+///     "192.168.1.1:830",
+///     "admin",
+///     Path::new("/path/to/private/key"),
+///     Some("passphrase")
+/// )?;
+/// # Ok(())
+/// # }
+/// ```
 pub struct RusshTransport {
     runtime: Runtime,
     channel: Channel<client::Msg>,
@@ -68,7 +193,35 @@ impl client::Handler for ClientHandler {
 }
 
 impl RusshTransport {
-    /// Connect with username and password using default configuration
+    /// Connect to a NETCONF server using password authentication with default configuration
+    ///
+    /// This method establishes a NETCONF over SSH connection using password authentication
+    /// and default settings (30 second inactivity timeout).
+    ///
+    /// # Arguments
+    ///
+    /// * `addr` - Server address in format "host:port" (e.g., "192.168.1.1:830")
+    /// * `user_name` - SSH username
+    /// * `password` - SSH password
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the initialized `RusshTransport` or an `io::Error`
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use netconf_rs::transport::russh::RusshTransport;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// let transport = RusshTransport::connect_password(
+    ///     "192.168.1.1:830",
+    ///     "admin",
+    ///     "password"
+    /// )?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn connect_password(
         addr: &str,
         user_name: &str,
@@ -77,7 +230,7 @@ impl RusshTransport {
         Self::connect_password_with_config(addr, user_name, password, &RusshConfig::default())
     }
 
-    /// Connect with username and password using custom configuration
+    /// Connect to a NETCONF server using password authentication with custom configuration
     pub fn connect_password_with_config(
         addr: &str,
         user_name: &str,
@@ -133,7 +286,47 @@ impl RusshTransport {
         })
     }
 
-    /// Connect with username and private key file using default configuration
+    /// Connect to a NETCONF server using key-based authentication with default configuration
+    ///
+    /// This method establishes a NETCONF over SSH connection using private key authentication
+    /// and default settings (30 second inactivity timeout).
+    ///
+    /// # Arguments
+    ///
+    /// * `addr` - Server address in format "host:port" (e.g., "192.168.1.1:830")
+    /// * `user_name` - SSH username
+    /// * `key_file` - Path to the private key file (e.g., PEM, OpenSSH format)
+    /// * `passphrase` - Optional passphrase for the private key (None if key has no passphrase)
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the initialized `RusshTransport` or an `io::Error`
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use netconf_rs::transport::russh::RusshTransport;
+    /// use std::path::Path;
+    ///
+    /// # fn main() -> std::io::Result<()> {
+    /// // Key without passphrase
+    /// let transport = RusshTransport::connect_key(
+    ///     "192.168.1.1:830",
+    ///     "admin",
+    ///     Path::new("/home/user/.ssh/id_ed25519"),
+    ///     None
+    /// )?;
+    ///
+    /// // Key with passphrase
+    /// let transport = RusshTransport::connect_key(
+    ///     "192.168.1.1:830",
+    ///     "admin",
+    ///     Path::new("/home/user/.ssh/id_rsa"),
+    ///     Some("my-passphrase")
+    /// )?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn connect_key(
         addr: &str,
         user_name: &str,
@@ -149,7 +342,7 @@ impl RusshTransport {
         )
     }
 
-    /// Connect with username and private key file using custom configuration
+    /// Connect to a NETCONF server using key-based authentication with custom configuration
     pub fn connect_key_with_config(
         addr: &str,
         user_name: &str,
