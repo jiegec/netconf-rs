@@ -7,7 +7,7 @@ use std::io;
 /// Get YANG schema
 pub fn get_mac_table(conn: &mut Connection) -> io::Result<Mac> {
     conn.transport.write_xml(
-        &r#"
+        r#"
 <?xml version="1.0" encoding="UTF-8"?>
 <rpc message-id="100"
     xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -21,8 +21,7 @@ pub fn get_mac_table(conn: &mut Connection) -> io::Result<Mac> {
             </top>
         </filter>
     </get>
-</rpc>"#
-            .to_string(),
+</rpc>"#,
     )?;
     let resp = conn.transport.read_xml()?;
     let reply: RpcReply = from_str(resp.trim()).unwrap();

@@ -2,7 +2,11 @@
 
 use std::io;
 
+#[cfg(feature = "ssh2")]
 pub mod ssh;
+
+#[cfg(feature = "russh")]
+pub mod russh;
 
 /// Trait for NETCONF transport
 pub trait Transport: Send {

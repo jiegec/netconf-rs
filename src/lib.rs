@@ -9,11 +9,13 @@ pub mod vendor;
 
 #[derive(Debug, Deserialize)]
 struct Hello {
+    #[allow(dead_code)]
     pub capabilities: Capabilities,
 }
 
 #[derive(Debug, Deserialize)]
 struct Capabilities {
+    #[allow(dead_code)]
     pub capability: Vec<String>,
 }
 

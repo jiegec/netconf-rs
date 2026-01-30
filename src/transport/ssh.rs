@@ -1,15 +1,16 @@
-//! SSH transport
+//! SSH transport using ssh2 library
 
 use crate::transport::Transport;
 use memmem::{Searcher, TwoWaySearcher};
-use ssh2::Channel;
-use ssh2::Session;
 use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-/// NETCONF over SSH
+use ssh2::{Channel, Session};
+
+/// NETCONF over SSH using ssh2 library
 pub struct SSHTransport {
+    #[allow(dead_code)]
     session: Session,
     channel: Channel,
     read_buffer: Vec<u8>,
