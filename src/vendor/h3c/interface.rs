@@ -5,9 +5,9 @@
 //! https://github.com/HPENetworking/pyhpecw7/blob/master/pyhpecw7/features/switchport.py
 
 use super::{Interfaces, RpcReply};
+use crate::xml::from_str;
 use crate::Connection;
 use log::*;
-use serde_xml_rs::from_str;
 use std::io;
 
 /// Get all interfaces.

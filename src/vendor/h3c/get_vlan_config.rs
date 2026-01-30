@@ -3,10 +3,10 @@
 //! Reference:
 //! https://github.com/HPENetworking/pyhpecw7/blob/master/pyhpecw7/features/vlan.py
 
+use crate::xml::from_str;
 use crate::Connection;
 use log::*;
 use serde_derive::Deserialize;
-use serde_xml_rs::from_str;
 use std::io;
 
 #[derive(Debug, Deserialize)]

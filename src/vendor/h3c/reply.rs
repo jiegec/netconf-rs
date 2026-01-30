@@ -106,7 +106,7 @@ pub struct Unicast {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_xml_rs::from_str;
+    use crate::xml::from_str;
 
     #[test]
     fn parse_mac_table() {

@@ -1,11 +1,12 @@
 use crate::transport::Transport;
+use crate::xml::from_str;
 use log::*;
 use serde_derive::Deserialize;
-use serde_xml_rs::from_str;
 use std::io;
 
 pub mod transport;
 pub mod vendor;
+pub mod xml;
 
 #[derive(Debug, Deserialize)]
 struct Hello {

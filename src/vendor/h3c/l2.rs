@@ -1,7 +1,7 @@
 use super::{Mac, RpcReply};
+use crate::xml::from_str;
 use crate::Connection;
 use log::*;
-use serde_xml_rs::from_str;
 use std::io;
 
 /// Get YANG schema

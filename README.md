@@ -4,7 +4,9 @@ A Rust library to configure devices with NETCONF(RFC 6241) protocol.
 
 ## Features
 
-netconf-rs supports multiple SSH backends through Cargo features:
+netconf-rs supports multiple SSH backends and XML libraries through Cargo features:
+
+### SSH Backends
 
 - **ssh2** (default): Uses the `ssh2` crate for SSH connections
   - Module: `netconf_rs::transport::ssh::SSHTransport`
@@ -23,6 +25,20 @@ Or enable both features:
 ```toml
 [dependencies]
 netconf-rs = { version = "0.2", features = ["russh"] }
+```
+
+### XML Libraries
+
+- **serde-xml** (default): Uses `serde-xml-rs` for XML parsing
+  - Module: `netconf_rs::xml`
+- **quick-xml**: Uses `quick-xml` for XML parsing (better namespace support, faster)
+  - Module: `netconf_rs::xml`
+
+Enable the quick-xml feature instead of serde-xml:
+
+```toml
+[dependencies]
+netconf-rs = { version = "0.2", default-features = false, features = ["quick-xml", "ssh2"] }
 ```
 
 ## Transports
