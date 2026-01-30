@@ -17,7 +17,7 @@
 //!
 //! ### Basic usage with ssh2 backend
 //!
-//! ```no_run
+//! ```ignore
 //! use netconf_rs::transport::ssh::SSHTransport;
 //! use netconf_rs::Connection;
 //!
@@ -29,6 +29,8 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! *Note: The ssh2 backend requires the `ssh2` feature to be enabled.*
 //!
 //! ### Using the russh backend
 //!
@@ -112,7 +114,7 @@ struct Capabilities {
 ///
 /// # Examples
 ///
-/// ```no_run
+/// ```ignore
 /// use netconf_rs::transport::ssh::SSHTransport;
 /// use netconf_rs::Connection;
 ///
@@ -122,6 +124,8 @@ struct Capabilities {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// *Note: This example requires the `ssh2` feature to be enabled.*
 pub struct Connection {
     pub(crate) transport: Box<dyn Transport + Send + 'static>,
 }
@@ -143,7 +147,7 @@ impl Connection {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// use netconf_rs::transport::ssh::SSHTransport;
     /// use netconf_rs::Connection;
     ///
@@ -153,6 +157,8 @@ impl Connection {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// *Note: This example requires the `ssh2` feature to be enabled.*
     pub fn new(transport: impl Transport + 'static) -> io::Result<Connection> {
         let mut res = Connection {
             transport: Box::from(transport),
@@ -201,7 +207,7 @@ impl Connection {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// # use netconf_rs::Connection;
     /// # fn main() -> std::io::Result<()> {
     /// # let mut conn = Connection::new(netconf_rs::transport::ssh::SSHTransport::connect(
@@ -212,6 +218,8 @@ impl Connection {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// *Note: This example requires the `ssh2` feature to be enabled.*
     pub fn get_config(&mut self) -> io::Result<String> {
         self.transport.write_xml(
             r#"
