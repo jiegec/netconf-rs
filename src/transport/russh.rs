@@ -4,12 +4,48 @@ use crate::transport::Transport;
 use memmem::{Searcher, TwoWaySearcher};
 use russh::client;
 use russh::keys::{load_secret_key, PrivateKeyWithHashAlg};
-use russh::{Channel, ChannelMsg, Preferred};
+use russh::{Channel, ChannelMsg};
 use std::io;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
+
+/// Configuration for SSH transport using russh library
+#[derive(Debug, Clone)]
+pub struct RusshConfig {
+    /// Timeout for inactivity
+    pub inactivity_timeout: Option<Duration>,
+}
+
+impl Default for RusshConfig {
+    fn default() -> Self {
+        Self {
+            inactivity_timeout: Some(Duration::from_secs(30)),
+        }
+    }
+}
+
+impl RusshConfig {
+    /// Create a new Russh configuration with default values
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Set the inactivity timeout
+    pub fn inactivity_timeout(mut self, timeout: Duration) -> Self {
+        self.inactivity_timeout = Some(timeout);
+        self
+    }
+
+    /// Build the russh client config
+    fn build_client_config(&self) -> client::Config {
+        client::Config {
+            inactivity_timeout: self.inactivity_timeout,
+            ..<_>::default()
+        }
+    }
+}
 
 /// NETCONF over SSH using russh library
 pub struct RusshTransport {
@@ -32,11 +68,21 @@ impl client::Handler for ClientHandler {
 }
 
 impl RusshTransport {
-    /// Connect using username and password
+    /// Connect with username and password using default configuration
     pub fn connect_password(
         addr: &str,
         user_name: &str,
         password: &str,
+    ) -> io::Result<RusshTransport> {
+        Self::connect_password_with_config(addr, user_name, password, &RusshConfig::default())
+    }
+
+    /// Connect with username and password using custom configuration
+    pub fn connect_password_with_config(
+        addr: &str,
+        user_name: &str,
+        password: &str,
+        config: &RusshConfig,
     ) -> io::Result<RusshTransport> {
         let runtime = Runtime::new().map_err(|e| {
             io::Error::new(
@@ -45,15 +91,11 @@ impl RusshTransport {
             )
         })?;
 
-        let config = client::Config {
-            inactivity_timeout: Some(Duration::from_secs(5)),
-            ..<_>::default()
-        };
-        let config = Arc::new(config);
+        let client_config = Arc::new(config.build_client_config());
         let handler = ClientHandler;
 
         let mut session = runtime
-            .block_on(client::connect(config, addr, handler))
+            .block_on(client::connect(client_config, addr, handler))
             .map_err(|e| {
                 io::Error::new(io::ErrorKind::Other, format!("Connection failed: {}", e))
             })?;
@@ -91,12 +133,29 @@ impl RusshTransport {
         })
     }
 
-    /// Connect using username and private key file
+    /// Connect with username and private key file using default configuration
     pub fn connect_key(
         addr: &str,
         user_name: &str,
         key_file: &Path,
         passphrase: Option<&str>,
+    ) -> io::Result<RusshTransport> {
+        Self::connect_key_with_config(
+            addr,
+            user_name,
+            key_file,
+            passphrase,
+            &RusshConfig::default(),
+        )
+    }
+
+    /// Connect with username and private key file using custom configuration
+    pub fn connect_key_with_config(
+        addr: &str,
+        user_name: &str,
+        key_file: &Path,
+        passphrase: Option<&str>,
+        config: &RusshConfig,
     ) -> io::Result<RusshTransport> {
         let runtime = Runtime::new().map_err(|e| {
             io::Error::new(
@@ -108,16 +167,11 @@ impl RusshTransport {
         let key = load_secret_key(key_file, passphrase)
             .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Key load failed: {}", e)))?;
 
-        let config = client::Config {
-            inactivity_timeout: Some(Duration::from_secs(5)),
-            preferred: Preferred::default(),
-            ..<_>::default()
-        };
-        let config = Arc::new(config);
+        let client_config = Arc::new(config.build_client_config());
         let handler = ClientHandler;
 
         let mut session = runtime
-            .block_on(client::connect(config, addr, handler))
+            .block_on(client::connect(client_config, addr, handler))
             .map_err(|e| {
                 io::Error::new(io::ErrorKind::Other, format!("Connection failed: {}", e))
             })?;
