@@ -21,7 +21,7 @@ pub fn get_netconf_information(conn: &mut Connection) -> io::Result<NetconfState
 </rpc>"#,
     )?;
     let resp = conn.transport.read_xml()?;
-    let reply: RpcReply = from_str(&resp.trim()).unwrap();
+    let reply: RpcReply = from_str(resp.trim()).unwrap();
     debug!("{:#?}", reply.data.netconf_state);
     Ok(reply.data.netconf_state.unwrap())
 }
@@ -52,7 +52,7 @@ pub fn get_schema(
         id, version, format
     ))?;
     let resp = conn.transport.read_xml()?;
-    let reply: GetSchemaRpcReply = from_str(&resp.trim()).unwrap();
+    let reply: GetSchemaRpcReply = from_str(resp.trim()).unwrap();
     info!("{}", reply.data);
     Ok(reply.data)
 }
